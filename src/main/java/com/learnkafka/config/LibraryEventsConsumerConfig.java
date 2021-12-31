@@ -1,5 +1,6 @@
 package com.learnkafka.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -16,6 +17,7 @@ import org.springframework.kafka.listener.ContainerProperties;
 
 @Configuration
 @EnableKafka
+@Slf4j
 public class LibraryEventsConsumerConfig {
     @Autowired
     KafkaProperties kafkaProperties;
@@ -30,6 +32,9 @@ public class LibraryEventsConsumerConfig {
                 .getIfAvailable(() -> new DefaultKafkaConsumerFactory<>(this.kafkaProperties.buildConsumerProperties())));
         //factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         //factory.setConcurrency(3);
+        factory.setErrorHandler(((thrownException, data) -> {
+            log.info("Exception in consumerConfig is {} and the record is {}",thrownException.getMessage(), data);
+        }));
         return factory;
     }
 }
